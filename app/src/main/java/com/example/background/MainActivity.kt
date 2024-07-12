@@ -24,13 +24,19 @@ class MainActivity : AppCompatActivity() {
         val btnStop = findViewById<Button>(R.id.btnStop)
 
         btnPlay.setOnClickListener(onClickListenerPlay())
-
+        btnStop.setOnClickListener(onClickListenerStop())
     }
 
     private fun onClickListenerPlay():(View)->Unit={
         val audioPlayServiceIntent = Intent(applicationContext, AudioPlayServices::class.java)
         audioPlayServiceIntent.putExtra(AudioPlayServices.FILENAME, "mariposa.mp3")
         audioPlayServiceIntent.putExtra(AudioPlayServices.COMMAND, AudioPlayServices.PLAY)
+        startService(audioPlayServiceIntent)
+    }
+
+    private fun onClickListenerStop():(View)->Unit={
+        val audioPlayServiceIntent = Intent(applicationContext, AudioPlayServices::class.java)
+        audioPlayServiceIntent.putExtra(AudioPlayServices.COMMAND, AudioPlayServices.STOP)
         startService(audioPlayServiceIntent)
     }
 }

@@ -5,9 +5,11 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.os.IBinder
 
-class AudioPlayServices: Service() {
-    private lateinit var mediaPlayer: MediaPlayer
-    companion object{
+class AudioPlayServices : Service() {
+
+    private var mediaPlayer: MediaPlayer? = null
+
+    companion object {
         const val FILENAME = "FILENAME"
         const val COMMAND = "COMMAND"
         const val PLAY = "PLAY"
@@ -15,47 +17,52 @@ class AudioPlayServices: Service() {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        TODO("Not yet implemented")
+        return null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         val filename = intent?.getStringExtra(FILENAME)
         val command = intent?.getStringExtra(COMMAND)
 
-        if (command == PLAY){
+        if (command == PLAY) {
             audioPlay(filename)
-        }else if (command == STOP){
+        } else if (command == STOP) {
             audioStop()
         }
 
         return START_STICKY
     }
 
-    private fun audioPlay(filename:String?){
-        if(filename != null){
+    private fun audioPlay(filename: String?) {
+        if (filename != null) {
             val assetFileDescriptor = assets.openFd(filename)
 
             mediaPlayer = MediaPlayer()
-            mediaPlayer.setDataSource(
-                assetFileDescriptor.fileDescriptor,
-                assetFileDescriptor.startOffset,
-                assetFileDescriptor.length
-            )
-
-            assetFileDescriptor.close()
-
-            mediaPlayer.prepare()
-            mediaPlayer.setVolume(1f, 1f)
-            mediaPlayer.isLooping=false
-            mediaPlayer.start()
+            mediaPlayer?.apply {
+                setDataSource(
+                    assetFileDescriptor.fileDescriptor,
+                    assetFileDescriptor.startOffset,
+                    assetFileDescriptor.length
+                )
+                assetFileDescriptor.close()
+                prepare()
+                setVolume(1f, 1f)
+                isLooping = false
+                start()
+            }
         }
-
     }
 
-    private fun audioStop(){
-        if (mediaPlayer != null){
-            mediaPlayer.stop()
+    private fun audioStop() {
+        mediaPlayer?.apply {
+            stop()
+            release()
         }
+        mediaPlayer = null
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        audioStop()
     }
 }
